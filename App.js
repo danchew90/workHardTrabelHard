@@ -1,14 +1,26 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { theme } from "./color";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function App() {
   const [nowState, setNowState] = useState("W");
   const [text, setText] = useState("");
+  const [toDos, setToDos] = useState({});
   const onChangeTxt = (e) => {
     setText(e);
   };
+  const addToDo = () => {
+    if (text === "") {
+      return;
+    }
+    const newToDos = Object.assign({}, toDos, { [Date.now()]: { text, work: nowState === "W" ? true : false } });
+    setToDos(newToDos);
+    setText("");
+  };
+  useEffect(() => {
+    console.log(toDos);
+  }, [toDos]);
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
@@ -30,8 +42,12 @@ export default function App() {
       </View>
       <View>
         <TextInput
+          defaultValue={text}
+          onSubmitEditing={addToDo}
+          autoComplete={"off"}
           onChangeText={onChangeTxt}
           style={styles.input}
+          autoCorrect={false}
           placeholder={nowState === "W" ? "Add a To Do!" : "Where Do you want to go?"}
         />
       </View>
