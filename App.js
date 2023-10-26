@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { theme } from "./color";
 import { useEffect, useState } from "react";
 
@@ -14,8 +14,7 @@ export default function App() {
     if (text === "") {
       return;
     }
-    const newToDos = Object.assign({}, toDos, { [Date.now()]: { text, work: nowState === "W" ? true : false } });
-    setToDos(newToDos);
+    setToDos({ ...toDos, [Date.now()]: { text, work: nowState === "W" ? true : false } });
     setText("");
   };
   useEffect(() => {
@@ -51,6 +50,23 @@ export default function App() {
           placeholder={nowState === "W" ? "Add a To Do!" : "Where Do you want to go?"}
         />
       </View>
+      <ScrollView>
+        {Object.keys(toDos).map((key) => {
+          if (nowState === "W" && toDos[key].work) {
+            return (
+              <View style={styles.toDo}>
+                <Text style={styles.toDoText}>{toDos[key].text}</Text>
+              </View>
+            );
+          } else if (nowState === "T" && !toDos[key].work) {
+            return (
+              <View style={styles.toDo}>
+                <Text style={styles.toDoText}>{toDos[key].text}</Text>
+              </View>
+            );
+          }
+        })}
+      </ScrollView>
     </View>
   );
 }
@@ -75,7 +91,19 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 30,
-    marginTop: 20,
+    marginVertical: 20,
     fontSize: 18,
+  },
+  toDo: {
+    backgroundColor: theme.toDoBg,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 15,
+    marginBottom: 10,
+  },
+  toDoText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: 500,
   },
 });
