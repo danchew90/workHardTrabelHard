@@ -2,6 +2,9 @@ import { StatusBar } from "expo-status-bar";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { theme } from "./color";
 import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const STORAGE_KEY = "@toDoObj";
 
 export default function App() {
   const [nowState, setNowState] = useState("W");
@@ -10,16 +13,27 @@ export default function App() {
   const onChangeTxt = (e) => {
     setText(e);
   };
-  const addToDo = () => {
+  const saveTodo = async (newTodo) => {
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newTodo));
+  };
+  const loadToDos = async () => {
+    const s = await AsyncStorage.getItem(STORAGE_KEY);
+    setToDos(JSON.parse(s));
+    console.log(JSON.parse(s));
+  };
+  const addToDo = async () => {
     if (text === "") {
       return;
     }
-    setToDos({ ...toDos, [Date.now()]: { text, work: nowState === "W" ? true : false } });
+    const newTodo = { ...toDos, [Date.now()]: { text, work: nowState === "W" ? true : false } };
+    setToDos(newTodo);
+    await saveTodo(newTodo);
     setText("");
   };
   useEffect(() => {
-    console.log(toDos);
-  }, [toDos]);
+    loadToDos();
+  }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
@@ -51,16 +65,16 @@ export default function App() {
         />
       </View>
       <ScrollView>
-        {Object.keys(toDos).map((key) => {
+        {Object.keys(toDos).map((key, idx) => {
           if (nowState === "W" && toDos[key].work) {
             return (
-              <View style={styles.toDo}>
+              <View style={styles.toDo} key={idx}>
                 <Text style={styles.toDoText}>{toDos[key].text}</Text>
               </View>
             );
           } else if (nowState === "T" && !toDos[key].work) {
             return (
-              <View style={styles.toDo}>
+              <View style={styles.toDo} key={idx}>
                 <Text style={styles.toDoText}>{toDos[key].text}</Text>
               </View>
             );
